@@ -1,8 +1,10 @@
 package guru.springframework.sfgpetclinic.bootstrap;
 
 import guru.springframework.sfgpetclinic.model.Owner;
+import guru.springframework.sfgpetclinic.model.PetType;
 import guru.springframework.sfgpetclinic.model.Vet;
 import guru.springframework.sfgpetclinic.services.OwnerService;
+import guru.springframework.sfgpetclinic.services.PetTypeService;
 import guru.springframework.sfgpetclinic.services.VetService;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -11,39 +13,43 @@ import org.springframework.stereotype.Component;
 public class DataLoader implements CommandLineRunner {
     private final OwnerService ownerService;
     private final VetService vetService;
+    private final PetTypeService petTypeService;
 
-    public DataLoader(OwnerService ownerService, VetService vetService) {
+    public DataLoader(OwnerService ownerService, VetService vetService, PetTypeService petTypeService) {
         this.ownerService = ownerService;
         this.vetService = vetService;
+        this.petTypeService = petTypeService;
     }
 
     @Override
     public void run(String... args) throws Exception {
+        PetType dog = new PetType();
+        dog.setName("Dog");
+        PetType savedDogPetType = petTypeService.save(dog);
+        PetType cat = new PetType();
+        cat.setName("Cat");
+        PetType savedCatPetType = petTypeService.save(dog);
+
         Owner owner1 = new Owner();
-        owner1.setId(1L);
-        owner1.setLastName("One");
-        owner1.setFirstName("Owner");
+        owner1.setLastName("Michael");
+        owner1.setFirstName("Weston");
         ownerService.save(owner1);
 
-
         Owner owner2 = new Owner();
-        owner2.setId(2L);
-        owner2.setLastName("Two");
-        owner2.setFirstName("Owner");
+        owner2.setLastName("Fionna");
+        owner2.setFirstName("Glenanne");
         ownerService.save(owner2);
 
         System.out.println("Loaded Owners...");
 
         Vet vet1 = new Vet();
-        vet1.setId(1L);
-        vet1.setLastName("One");
-        vet1.setFirstName("Vet");
+        vet1.setLastName("Sam");
+        vet1.setFirstName("Axe");
         vetService.save(vet1);
 
         Vet vet2 = new Vet();
-        vet2.setId(2L);
-        vet2.setLastName("Two");
-        vet2.setFirstName("Vet");
+        vet2.setLastName("Jessica");
+        vet2.setFirstName("Potter");
         vetService.save(vet2);
 
         System.out.println("Loaded vets...");
