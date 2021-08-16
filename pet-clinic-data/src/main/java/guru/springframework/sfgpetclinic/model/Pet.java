@@ -9,7 +9,7 @@ import java.util.Set;
 @Table(name="pets")
 public class Pet extends BaseEntity{
     private String name;
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "type_id")
     private PetType petType;
     @ManyToOne
