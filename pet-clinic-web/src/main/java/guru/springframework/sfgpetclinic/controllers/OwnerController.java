@@ -42,12 +42,16 @@ public class OwnerController {
     }
 
     @PostMapping("/find")
-    public String findOwner(@ModelAttribute Owner owner){
+    public String findOwner(@ModelAttribute Owner owner, Model model){
         Set<Owner> result  = ownerService.findAllByLastNameLike(owner.getLastName());
         if(result.size() == 1) {
             Owner ownerFound = result.stream().findFirst().orElse(new Owner());
             return "redirect:/owners/"+ownerFound.getId();
+        }else if(result.isEmpty()) {
+            return "";
+        }else {
+            model.addAttribute("owners", result);
+            return "owners/index";
         }
-        return "";
     }
 }
