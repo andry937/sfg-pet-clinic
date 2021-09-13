@@ -4,6 +4,7 @@ import guru.springframework.sfgpetclinic.model.Owner;
 import guru.springframework.sfgpetclinic.services.OwnerService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
@@ -42,13 +43,15 @@ public class OwnerController {
     }
 
     @PostMapping("/find")
-    public String findOwner(@ModelAttribute Owner owner, Model model){
+    public String findOwner(@ModelAttribute Owner owner, Model model, BindingResult bindingResult){
         Set<Owner> result  = ownerService.findAllByLastNameLike(owner.getLastName());
         if(result.size() == 1) {
             Owner ownerFound = result.stream().findFirst().orElse(new Owner());
             return "redirect:/owners/"+ownerFound.getId();
         }else if(result.isEmpty()) {
-            return "";
+            bindingResult.rejectValue("lastName","error.notFound","No owners found");
+            model.addAttribute("owner",owner);
+            return "owners/find";
         }else {
             model.addAttribute("owners", result);
             return "owners/index";

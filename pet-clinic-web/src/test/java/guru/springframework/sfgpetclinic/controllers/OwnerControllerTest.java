@@ -7,16 +7,20 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import static org.hamcrest.Matchers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 class OwnerControllerTest {
+    private final String ownerLastName = "test 1";
     MockMvc mockMvc;
     OwnerController ownerController;
     @Mock
@@ -30,24 +34,74 @@ class OwnerControllerTest {
     void setup(){
         MockitoAnnotations.initMocks(this);
         ownerController = new OwnerController(ownerService);
+        owners.add(Owner.builder().id(1L).build());
+        owners.add(Owner.builder().id(2L).build());
+
         mockMvc = MockMvcBuilders.standaloneSetup(ownerController)
                 .build();
-        Mockito.when(ownerService.findAll()).thenReturn(owners);
-        Mockito.when(ownerService.findById(Mockito.anyLong())).thenReturn(owners.stream().findFirst().orElse(new Owner()));
+
     }
     @Test
-    void listOwners() throws Exception {
+    void testListOwners() throws Exception {
+        Mockito.when(ownerService.findAll()).thenReturn(owners);
         mockMvc.perform(MockMvcRequestBuilders.get("/owners"))
                 .andExpect(status().isOk())
-                .andExpect(model().attributeExists("owners"))
+                .andExpect(model().attribute("owners", hasSize(owners.size())))
                 .andExpect(view().name("owners/index"));
     }
 
     @Test
-    void showOwners() throws Exception {
+    void testShowOwners() throws Exception {
+        Mockito.when(ownerService.findById(Mockito.anyLong())).thenReturn(owners.stream().findFirst().orElse(null));
         mockMvc.perform(MockMvcRequestBuilders.get("/owners/"+id))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("owner"))
                 .andExpect(view().name("owners/details"));
+    }
+
+    @Test
+    void testShowFindOwners() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/owners/find"))
+                .andExpect(status().isOk())
+                .andExpect(model().attributeExists("owner"))
+                .andExpect(view().name("owners/find"));
+        Mockito.verifyZeroInteractions(ownerService);
+    }
+
+    @Test
+    void testFindOwnerOne() throws Exception {
+        Set<Owner> results = owners.stream().limit(1).collect(Collectors.toSet());
+        Mockito.when(ownerService.findAllByLastNameLike(Mockito.anyString()))
+                .thenReturn(results);
+        mockMvc.perform(MockMvcRequestBuilders.post("/owners/find")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("lastName", ownerLastName))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(view().name("redirect:/owners/"+id));
+    }
+
+    @Test
+    void testFindOwnerMultiple() throws Exception {
+        Mockito.when(ownerService.findAllByLastNameLike(Mockito.anyString()))
+                .thenReturn(owners);
+        mockMvc.perform(MockMvcRequestBuilders.post("/owners/find")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("lastName", ownerLastName))
+                .andExpect(status().isOk())
+                .andExpect(view().name("owners/index"))
+                .andExpect(model().attribute("owners", hasSize(owners.size())));
+    }
+
+    @Test
+    void testFindOwnerNoResult() throws Exception {
+        Mockito.when(ownerService.findAllByLastNameLike(Mockito.anyString()))
+                .thenReturn(new HashSet<>());
+        mockMvc.perform(MockMvcRequestBuilders.post("/owners/find")
+                        .contentType(MediaType.APPLICATION_FORM_URLENCODED)
+                        .param("lastName", ownerLastName))
+                .andExpect(status().isOk())
+                .andExpect(view().name("owners/find"))
+                .andExpect(model().attributeHasFieldErrors("owner","lastName"))
+                .andExpect(model().attribute("owner",hasProperty("lastName", is(ownerLastName))));
     }
 }
