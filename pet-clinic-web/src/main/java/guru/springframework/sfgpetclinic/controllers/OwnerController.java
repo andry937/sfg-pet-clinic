@@ -1,5 +1,6 @@
 package guru.springframework.sfgpetclinic.controllers;
 
+import guru.springframework.sfgpetclinic.model.Owner;
 import guru.springframework.sfgpetclinic.services.OwnerService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -32,5 +33,11 @@ public class OwnerController {
     public String showOwner(@PathVariable String id, Model model){
         model.addAttribute("owner", ownerService.findById(Long.valueOf(id)));
         return "owners/details";
+    }
+
+    @RequestMapping("/find")
+    public String showFindOwner(Model model){
+        model.addAttribute("owner", new Owner());
+        return "owners/find";
     }
 }
