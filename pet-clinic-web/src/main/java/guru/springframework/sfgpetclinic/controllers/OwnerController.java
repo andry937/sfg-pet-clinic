@@ -5,9 +5,9 @@ import guru.springframework.sfgpetclinic.services.OwnerService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
-import org.springframework.web.bind.annotation.InitBinder;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Set;
 
 @RequestMapping("/owners")
 @Controller
@@ -39,5 +39,15 @@ public class OwnerController {
     public String showFindOwner(Model model){
         model.addAttribute("owner", new Owner());
         return "owners/find";
+    }
+
+    @PostMapping("/find")
+    public String findOwner(@ModelAttribute Owner owner){
+        Set<Owner> result  = ownerService.findAllByLastNameLike(owner.getLastName());
+        if(result.size() == 1) {
+            Owner ownerFound = result.stream().findFirst().orElse(new Owner());
+            return "redirect:/owners/"+ownerFound.getId();
+        }
+        return "";
     }
 }
