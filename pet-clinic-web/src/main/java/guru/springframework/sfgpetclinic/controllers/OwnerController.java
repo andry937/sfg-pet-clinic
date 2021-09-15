@@ -8,11 +8,13 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.Set;
 
 @RequestMapping("/owners")
 @Controller
 public class OwnerController {
+    public static final String VIEW_OWNERS_FORM = "owners/form";
     private final OwnerService ownerService;
 
     public OwnerController(OwnerService ownerService) {
@@ -56,5 +58,43 @@ public class OwnerController {
             model.addAttribute("owners", result);
             return "owners/index";
         }
+    }
+
+    @RequestMapping("/new")
+    public String initCreateForm(Model model){
+        model.addAttribute("owner", new Owner());
+        return VIEW_OWNERS_FORM;
+    }
+
+    private String createOrUpdateAction(Owner owner, BindingResult result) {
+        return createOrUpdateAction(owner, result, null);
+    }
+
+    private String createOrUpdateAction(Owner owner, BindingResult result, Long id){
+        if(result.hasErrors()){
+            return VIEW_OWNERS_FORM;
+        }
+        if(id !=null){
+            owner.setId(id);
+        }
+        Owner savedOwner = ownerService.save(owner);
+        return "redirect:/owners/"+savedOwner.getId();
+    }
+
+    @PostMapping("/new")
+    public String performCreate(@Valid Owner owner, BindingResult result){
+        return createOrUpdateAction(owner,result);
+    }
+
+    @PostMapping("/{id}/edit")
+    public String performEdit(@Valid Owner owner, BindingResult result, @PathVariable Long id){
+        return createOrUpdateAction(owner, result, id);
+    }
+
+    @RequestMapping("/{id}/edit")
+    public String initUpdateForm(@PathVariable String id, Model model){
+        Owner owner = ownerService.findById(Long.valueOf(id));
+        model.addAttribute("owner", owner);
+        return VIEW_OWNERS_FORM;
     }
 }

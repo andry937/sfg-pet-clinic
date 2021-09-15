@@ -34,7 +34,7 @@ class OwnerControllerTest {
     void setup(){
         MockitoAnnotations.initMocks(this);
         ownerController = new OwnerController(ownerService);
-        owners.add(Owner.builder().id(1L).build());
+        owners.add(Owner.builder().id(id).build());
         owners.add(Owner.builder().id(2L).build());
 
         mockMvc = MockMvcBuilders.standaloneSetup(ownerController)
@@ -103,5 +103,50 @@ class OwnerControllerTest {
                 .andExpect(view().name("owners/find"))
                 .andExpect(model().attributeHasFieldErrors("owner","lastName"))
                 .andExpect(model().attribute("owner",hasProperty("lastName", is(ownerLastName))));
+    }
+
+    @Test
+    void testCreateOwner() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders.get("/owners/new"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("owners/form"))
+                .andExpect(model().attributeExists("owner"));
+    }
+
+    @Test
+    void testUpdateOwner() throws Exception {
+        Mockito.when(ownerService.findById(Mockito.anyLong())).thenReturn(owners.stream().findFirst().orElse(null));
+        mockMvc.perform(MockMvcRequestBuilders.get("/owners/"+id+"/edit"))
+                .andExpect(status().isOk())
+                .andExpect(view().name("owners/form"))
+                .andExpect(model().attribute("owner",hasProperty("id", is(id))));
+    }
+
+    @Test
+    void testPerformCreate() throws Exception{
+        Mockito.when(ownerService.save(Mockito.any(Owner.class)))
+                .then(parameter -> {
+                    //Set owner ID
+                    Owner owner = parameter.getArgument(0);
+                    owner.setId(id);
+                    return owner;
+                });
+        mockMvc.perform(MockMvcRequestBuilders.post("/owners/new"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(view().name("redirect:/owners/"+id));
+    }
+
+    @Test
+    void testPerformUpdate() throws Exception{
+        Mockito.when(ownerService.save(Mockito.any(Owner.class)))
+                .then(parameter -> {
+                    //Set owner ID
+                    Owner owner = parameter.getArgument(0);
+                    owner.setId(id);
+                    return owner;
+                });
+        mockMvc.perform(MockMvcRequestBuilders.post("/owners/"+id+"/edit"))
+                .andExpect(status().is3xxRedirection())
+                .andExpect(view().name("redirect:/owners/"+id));
     }
 }
