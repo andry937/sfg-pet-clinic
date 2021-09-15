@@ -49,6 +49,9 @@ public class OwnerController {
 
     @PostMapping("/find")
     public String findOwner(@ModelAttribute Owner owner, Model model, BindingResult bindingResult){
+        if(owner.getLastName() == null || owner.getLastName().isEmpty()){
+            return "redirect:/owners";
+        }
         Set<Owner> result  = ownerService.findAllByLastNameLike(owner.getLastName());
         if(result.size() == 1) {
             Owner ownerFound = result.stream().findFirst().orElse(new Owner());
