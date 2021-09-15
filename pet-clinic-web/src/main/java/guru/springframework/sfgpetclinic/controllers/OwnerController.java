@@ -15,6 +15,9 @@ import java.util.Set;
 @Controller
 public class OwnerController {
     public static final String VIEW_OWNERS_FORM = "owners/form";
+    public static final String VIEW_OWNERS_INDEX = "owners/index";
+    public static final String VIEW_OWNERS_FIND = "owners/find";
+    public static final String VIEW_OWNERS_DETAILS = "owners/details";
     private final OwnerService ownerService;
 
     public OwnerController(OwnerService ownerService) {
@@ -29,19 +32,19 @@ public class OwnerController {
     @RequestMapping({"", "/","/index","/index.html"})
     public String listOwners(Model model){
         model.addAttribute("owners", ownerService.findAll());
-        return "owners/index";
+        return VIEW_OWNERS_INDEX;
     }
 
     @RequestMapping("/{id}")
     public String showOwner(@PathVariable String id, Model model){
         model.addAttribute("owner", ownerService.findById(Long.valueOf(id)));
-        return "owners/details";
+        return VIEW_OWNERS_DETAILS;
     }
 
     @RequestMapping("/find")
     public String showFindOwner(Model model){
         model.addAttribute("owner", new Owner());
-        return "owners/find";
+        return VIEW_OWNERS_FIND;
     }
 
     @PostMapping("/find")
@@ -53,10 +56,10 @@ public class OwnerController {
         }else if(result.isEmpty()) {
             bindingResult.rejectValue("lastName","error.notFound","No owners found");
             model.addAttribute("owner",owner);
-            return "owners/find";
+            return VIEW_OWNERS_FIND;
         }else {
             model.addAttribute("owners", result);
-            return "owners/index";
+            return VIEW_OWNERS_INDEX;
         }
     }
 

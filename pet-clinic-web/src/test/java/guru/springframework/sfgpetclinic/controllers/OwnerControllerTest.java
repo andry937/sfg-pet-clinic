@@ -47,7 +47,7 @@ class OwnerControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/owners"))
                 .andExpect(status().isOk())
                 .andExpect(model().attribute("owners", hasSize(owners.size())))
-                .andExpect(view().name("owners/index"));
+                .andExpect(view().name(OwnerController.VIEW_OWNERS_INDEX));
     }
 
     @Test
@@ -56,7 +56,7 @@ class OwnerControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/owners/"+id))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("owner"))
-                .andExpect(view().name("owners/details"));
+                .andExpect(view().name(OwnerController.VIEW_OWNERS_DETAILS));
     }
 
     @Test
@@ -64,7 +64,7 @@ class OwnerControllerTest {
         mockMvc.perform(MockMvcRequestBuilders.get("/owners/find"))
                 .andExpect(status().isOk())
                 .andExpect(model().attributeExists("owner"))
-                .andExpect(view().name("owners/find"));
+                .andExpect(view().name(OwnerController.VIEW_OWNERS_FIND));
         Mockito.verifyZeroInteractions(ownerService);
     }
 
@@ -88,7 +88,7 @@ class OwnerControllerTest {
                         .contentType(MediaType.APPLICATION_FORM_URLENCODED)
                         .param("lastName", ownerLastName))
                 .andExpect(status().isOk())
-                .andExpect(view().name("owners/index"))
+                .andExpect(view().name(OwnerController.VIEW_OWNERS_INDEX))
                 .andExpect(model().attribute("owners", hasSize(owners.size())));
     }
 
@@ -109,7 +109,7 @@ class OwnerControllerTest {
     void testCreateOwner() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders.get("/owners/new"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("owners/form"))
+                .andExpect(view().name(OwnerController.VIEW_OWNERS_FORM))
                 .andExpect(model().attributeExists("owner"));
     }
 
@@ -118,7 +118,7 @@ class OwnerControllerTest {
         Mockito.when(ownerService.findById(Mockito.anyLong())).thenReturn(owners.stream().findFirst().orElse(null));
         mockMvc.perform(MockMvcRequestBuilders.get("/owners/"+id+"/edit"))
                 .andExpect(status().isOk())
-                .andExpect(view().name("owners/form"))
+                .andExpect(view().name(OwnerController.VIEW_OWNERS_FORM))
                 .andExpect(model().attribute("owner",hasProperty("id", is(id))));
     }
 
