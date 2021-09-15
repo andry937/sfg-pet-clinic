@@ -69,16 +69,9 @@ public class OwnerController {
         return VIEW_OWNERS_FORM;
     }
 
-    private String createOrUpdateAction(Owner owner, BindingResult result) {
-        return createOrUpdateAction(owner, result, null);
-    }
-
-    private String createOrUpdateAction(Owner owner, BindingResult result, Long id){
+    private String createOrUpdateAction(Owner owner, BindingResult result){
         if(result.hasErrors()){
             return VIEW_OWNERS_FORM;
-        }
-        if(id !=null){
-            owner.setId(id);
         }
         Owner savedOwner = ownerService.save(owner);
         return "redirect:/owners/"+savedOwner.getId();
@@ -91,7 +84,8 @@ public class OwnerController {
 
     @PostMapping("/{id}/edit")
     public String performEdit(@Valid Owner owner, BindingResult result, @PathVariable Long id){
-        return createOrUpdateAction(owner, result, id);
+        owner.setId(id);
+        return createOrUpdateAction(owner, result);
     }
 
     @RequestMapping("/{id}/edit")
